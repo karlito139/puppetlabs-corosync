@@ -197,6 +197,16 @@ class corosync(
       require => Package['corosync'],
       before  => Service['corosync'],
     }
+
+	# Ensure the cluster log dir existe
+	file{'cluster':
+
+		path	=> 'var/log/cluster',
+		ensure	=> 'directory',
+		owner	=> 'root',
+		group	=> 'root',
+		mode	=> '644',
+	}
   }
 
   if $check_standby == true {

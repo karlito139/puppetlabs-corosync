@@ -201,7 +201,7 @@ class corosync(
 	# Ensure the cluster log dir existe
 	file{'cluster':
 
-		path	=> 'var/log/cluster',
+		path	=> '/var/log/cluster',
 		ensure	=> 'directory',
 		owner	=> 'root',
 		group	=> 'root',

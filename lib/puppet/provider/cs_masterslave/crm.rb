@@ -103,16 +103,17 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      updated = 'order '
-      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
-      updated << "#{@property_hash[:first]} #{@property_hash[:second]}"
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
-      end
-    end
+#    unless @property_hash.empty?
+#      updated = 'order '
+#      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
+#      updated << "#{@property_hash[:first]} #{@property_hash[:second]}"
+#      Tempfile.open('puppet_crm_update') do |tmpfile|
+#        tmpfile.write(updated)
+#        tmpfile.flush
+#        ENV['CIB_shadow'] = @resource[:cib]
+#        crm('configure', 'load', 'update', tmpfile.path.to_s)
+#      end
+#    end
+    notice('Done nothing into flush')
   end
 end

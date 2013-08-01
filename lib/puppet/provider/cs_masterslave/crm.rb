@@ -39,7 +39,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
         :name       => items['id'],
         :ensure     => :present,
         :first      => first,
-        :score      => items['score'],
         :provider   => self.name
       }
       instances << new(order_instance)
@@ -54,7 +53,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
       :name       => @resource[:name],
       :ensure     => :present,
       :first      => @resource[:first],
-      :score      => @resource[:score],
       :cib        => @resource[:cib],
     }
   end
@@ -73,10 +71,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash[:first]
   end
 
-  def score
-    @property_hash[:score]
-  end
-
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
@@ -84,9 +78,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash[:first] = should
   end
 
-  def score=(should)
-    @property_hash[:score] = should
-  end
 
   # Flush is triggered on anything that has been detected as being
   # modified in the property_hash.  It generates a temporary file with

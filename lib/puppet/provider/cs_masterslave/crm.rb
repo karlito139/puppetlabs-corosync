@@ -24,9 +24,9 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
       items = e.attributes
 
       if items['first-action']
-        first = "#{items['first']}:#{items['first-action']}"
+        filesystem = "#{items['filesystem']}:#{items['filesystem-action']}"
       else
-        first = items['first']
+        filesystem = items['filesystem']
       end
 
       if items['then-action']
@@ -38,7 +38,7 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
       order_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :first      => first,
+        :filesystem => filesystem,
         :provider   => self.name
       }
       instances << new(order_instance)
@@ -52,7 +52,7 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :first      => @resource[:first],
+      :filesystem      => @resource[:filesystem],
       :cib        => @resource[:cib],
     }
   end
@@ -67,15 +67,15 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
   # Getters that obtains the first and second primitives and score in our
   # ordering definintion that have been populated by prefetch or instances
   # (depends on if your using puppet resource or not).
-  def first
-    @property_hash[:first]
+  def filesystem
+    @property_hash[:filesystem]
   end
 
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
-  def first=(should)
-    @property_hash[:first] = should
+  def filesystem=(should)
+    @property_hash[:filesystem] = should
   end
 
 

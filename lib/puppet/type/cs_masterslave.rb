@@ -25,11 +25,6 @@ module Puppet
         which primitive starts the desired state change chain."
     end
 
-    newproperty(:second) do
-      desc "Second Corosync primitive.  Our second primitive will move to the
-        desired state after the first primitive."
-    end
-
     newparam(:cib) do
       desc "Corosync applies its configuration immediately. Using a CIB allows
         you to group multiple primitives and relationships to be applied at
@@ -63,7 +58,6 @@ module Puppet
       autos = []
 
       autos << unmunge_cs_primitive(@parameters[:first].should)
-      autos << unmunge_cs_primitive(@parameters[:second].should)
 
       autos
     end

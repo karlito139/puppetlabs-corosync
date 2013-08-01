@@ -39,7 +39,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
         :name       => items['id'],
         :ensure     => :present,
         :first      => first,
-        :second     => second,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -55,7 +54,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
       :name       => @resource[:name],
       :ensure     => :present,
       :first      => @resource[:first],
-      :second     => @resource[:second],
       :score      => @resource[:score],
       :cib        => @resource[:cib],
     }
@@ -75,10 +73,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash[:first]
   end
 
-  def second
-    @property_hash[:second]
-  end
-
   def score
     @property_hash[:score]
   end
@@ -88,10 +82,6 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
   # in the property hash and doing this marks it to be flushed.
   def first=(should)
     @property_hash[:first] = should
-  end
-
-  def second=(should)
-    @property_hash[:second] = should
   end
 
   def score=(should)

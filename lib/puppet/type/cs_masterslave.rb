@@ -25,6 +25,28 @@ module Puppet
         which primitive starts the desired state change chain."
     end
 
+
+    newproperty(:meta) do
+      desc "An array of metadata to have in this masterslave.  Must be listed in the
+          order that you wish them to start."
+
+      # Have to redefine should= here so we can sort the array that is given to
+      # us by the manifest.  While were checking on the class of our value we
+      # are going to go ahead and do some validation too.  The way Corosync
+      # colocation works we need to only accept two value arrays.
+#      def should=(value)
+#        super
+#        raise Puppet::Error, "Puppet::Type::Cs_masterslave: primitives property must be at least a 2-element array." unless value.is_a? Array and value.length > 1
+#        @should
+#      end
+      validate do |value|
+        raise Puppet::Error, "Puppet::Type::Cs_Masterslave: parameters property must be a hash." unless value.is_a? Hash
+      end
+
+      defaultto Hash.new
+    end
+
+
     newparam(:cib) do
       desc "Corosync applies its configuration immediately. Using a CIB allows
         you to group multiple primitives and relationships to be applied at

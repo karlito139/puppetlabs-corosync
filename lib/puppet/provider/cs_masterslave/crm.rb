@@ -29,16 +29,13 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
         filesystem = items['filesystem']
       end
 
-      if items['then-action']
-        second = "#{items['then']}:#{items['then-action']}"
-      else
-        second = items['then']
-      end
+      meta = []
 
       order_instance = {
         :name       => items['id'],
         :ensure     => :present,
         :filesystem => filesystem,
+        :meta       => meta,
         :provider   => self.name
       }
       instances << new(order_instance)
@@ -52,7 +49,8 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :filesystem      => @resource[:filesystem],
+      :filesystem => @resource[:filesystem],
+      :meta       => @resource[:meta],
       :cib        => @resource[:cib],
     }
   end
@@ -71,11 +69,22 @@ Puppet::Type.type(:cs_masterslave).provide(:crm, :parent => Puppet::Provider::Co
     @property_hash[:filesystem]
   end
 
+
+  def meta
+    @property_hash[:meta]
+  end
+
+
+
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
   def filesystem=(should)
     @property_hash[:filesystem] = should
+  end
+
+  def meta=(should)
+    @property_hash[:meta] = should
   end
 
 

@@ -228,7 +228,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         tmpfile.write(updated)
         tmpfile.flush
         ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        cmd = [ command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
+        raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+        if status == 0
+                err(raw)
+        end
       end
     end
   end

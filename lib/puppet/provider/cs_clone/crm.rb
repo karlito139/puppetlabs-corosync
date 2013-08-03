@@ -10,6 +10,21 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
   # Path to the crm binary for interacting with the cluster configuration.
   commands :crm => 'crm'
 
+
+  # given an XML element containing some <nvpair>s, return a hash. Return an
+  # empty hash if `e` is nil.
+  def self.nvpairs_to_hash(e)
+    return {} if e.nil?
+
+    hash = {}
+    e.each_element do |i|
+      hash[(i.attributes['name'])] = i.attributes['value']
+    end
+
+    hash
+  end
+
+
   def self.instances
 
     block_until_ready
@@ -20,22 +35,20 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
+    REXML::XPath.each(doc, '//clone') do |e|
+
       items = e.attributes
 
-      if items['first-action']
-        resource = "#{items['resource']}:#{items['resource-action']}"
-      else
-        resource = items['resource']
-      end
+      primitives = e.elements['primitive']
+      rsc = primitives.attributes['id']
 
-      meta = []
+      metas = e.elements['meta_attributes']
 
       order_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :resource   => resource,
-        :meta       => meta,
+        :rsc        => rsc,
+        :meta       => nvpairs_to_hash(metas),
         :provider   => self.name
       }
       instances << new(order_instance)
@@ -49,7 +62,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :resource   => @resource[:resource],
+      :rsc        => @resource[:rsc],
       :meta       => @resource[:meta],
       :cib        => @resource[:cib],
     }
@@ -65,8 +78,8 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
   # Getters that obtains the first and second primitives and score in our
   # ordering definintion that have been populated by prefetch or instances
   # (depends on if your using puppet resource or not).
-  def resource
-    @property_hash[:resource]
+  def rsc
+    @property_hash[:rsc]
   end
 
 
@@ -79,8 +92,8 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
-  def resource=(should)
-    @property_hash[:resource] = should
+  def rsc=(should)
+    @property_hash[:rsc] = should
   end
 
   def meta=(should)
@@ -103,7 +116,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
       end
 
       updated = 'clone '
-      updated << "#{@property_hash[:name]} #{@property_hash[:resource]} "
+      updated << "#{@property_hash[:name]} #{@property_hash[:rsc]} "
       updated << "#{metas} " unless metas.nil?
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
@@ -112,7 +125,5 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Corosync
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
-
-
   end
 end

@@ -57,7 +57,7 @@ module Puppet
     autorequire(:cs_primitive) do
       autos = []
 
-#      autos << unmunge_cs_primitive(@parameters[:resource].should)
+      autos << unmunge_cs_primitive(@parameters[:rsc].should)
 
       autos
     end

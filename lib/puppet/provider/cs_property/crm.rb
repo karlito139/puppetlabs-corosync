@@ -20,17 +20,19 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|
-      items = e.attributes
-      property = { :name => items['name'], :value => items['value'] }
+    if ! doc.root.elements['configuration/crm_config/cluster_property_set'].nil?
+      doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|
+        items = e.attributes
+        property = { :name => items['name'], :value => items['value'] }
 
-      property_instance = {
-        :name       => property[:name],
-        :ensure     => :present,
-        :value      => property[:value],
-        :provider   => self.name
-      }
-      instances << new(property_instance)
+        property_instance = {
+          :name       => property[:name],
+          :ensure     => :present,
+          :value      => property[:value],
+          :provider   => self.name
+        }
+        instances << new(property_instance)
+      end
     end
     instances
   end

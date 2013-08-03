@@ -28,7 +28,10 @@ class corosync::reprobe {
   Cs_order <| |> {
     notify => Exec['crm resource reprobe'],
   }
-  Cs_masterslave <| |> {
+  Cs_clone <| |> {
+    notify => Exec['crm resource reprobe'],
+  }
+  Cs_location <| |> {
     notify => Exec['crm resource reprobe'],
   }
   Cs_group <| |> {

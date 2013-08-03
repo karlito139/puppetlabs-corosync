@@ -19,7 +19,7 @@ module Puppet
       isnamevar
     end
 
-    newproperty(:resource) do
+    newproperty(:rsc) do
       desc "First Corosync primitive.  Just like colocation, our primitives for
         ording come in pairs but this time order matters so we need to define
         which primitive starts the desired state change chain."
@@ -43,7 +43,7 @@ module Puppet
         other primitives.  This value can be an integer but is often defined
         as the string INFINITY."
 
-      defaultto 'INFINITY'
+#      defaultto 'INFINITY'
     end
 
     autorequire(:cs_shadow) do
@@ -57,7 +57,7 @@ module Puppet
     autorequire(:cs_primitive) do
       autos = []
 
-      autos << unmunge_cs_primitive(@parameters[:resource].should)
+#      autos << unmunge_cs_primitive(@parameters[:resource].should)
 
       autos
     end

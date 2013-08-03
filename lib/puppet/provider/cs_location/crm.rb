@@ -20,23 +20,61 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
+    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_location') do |e|
+
       items = e.attributes
 
-      if items['first-action']
-        resource = "#{items['first']}:#{items['first-action']}"
-      else
-        resource = items['first']
+      rule = e.elements['rule']
+      attr_rule = rule.attributes
+
+      str_rule = "$role="
+      str_rule << attr_rule['role']
+      str_rule << " "
+      str_rule << attr_rule['score']
+      str_rule << ": "
+
+      size_operator = attr_rule['boolean-op'].length+3
+
+
+      rule.each_element('expression') do |f|
+
+        attr_expression = f.attributes
+
+        str_rule << ""
+
+        if attr_expression['operation'] == "lte"
+
+          str_rule << attr_expression['attribute']
+          str_rule << " "
+          str_rule << attr_expression['type']
+          str_rule << ":"
+          str_rule << attr_expression['operation']
+          str_rule << " "
+          str_rule << attr_expression['value']
+          str_rule << " "
+        else
+
+          str_rule << attr_expression['operation']
+          str_rule << " "
+          str_rule << attr_expression['attribute']
+          str_rule << " "
+        end
+
+        str_rule << attr_rule['boolean-op']
+        str_rule << " "
       end
 
-      order_instance = {
+      str_rule = str_rule[0..-size_operator]
+
+
+      location_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :resource   => resource,
-        :rule       => items['rule'],
+        :rsc        => items['rsc'],
+        :rule       => str_rule,
         :provider   => self.name
       }
-      instances << new(order_instance)
+      instances << new(location_instance)
     end
     instances
   end
@@ -47,7 +85,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :resource   => @resource[:resource],
+      :rsc        => @resource[:rsc],
       :rule       => @resource[:rule],
       :cib        => @resource[:cib],
     }
@@ -63,8 +101,8 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   # Getters that obtains the first and second primitives and score in our
   # ordering definintion that have been populated by prefetch or instances
   # (depends on if your using puppet resource or not).
-  def resource
-    @property_hash[:resource]
+  def rsc
+    @property_hash[:rsc]
   end
 
   def rule
@@ -74,8 +112,8 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
-  def resource=(should)
-    @property_hash[:resource] = should
+  def rsc=(should)
+    @property_hash[:rsc] = should
   end
 
   def rule=(should)
@@ -89,8 +127,9 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   def flush
     unless @property_hash.empty?
       updated = 'location '
-      updated << "#{@property_hash[:name]} #{@property_hash[:resource]} "
+      updated << "#{@property_hash[:name]} #{@property_hash[:rsc]}"
       updated << "rule #{@property_hash[:rule]} "
+
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
